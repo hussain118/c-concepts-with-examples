@@ -1,1 +1,141 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
+typedef struct {
+    int id;
+    char name[50];
+} Student;
+
+typedef struct {
+    char courseName[50];
+    char courseCode[10];
+    int numStudents;
+    int numAssessments;
+    Student* studentList;
+    float** gradeMatrix;
+    char** assessmentNames;
+} Course;
+
+Course* createCourse(int students, int assessments) {
+    Course* c = (Course*)malloc(sizeof(Course));
+    if (c == NULL) {
+        exit(1);
+    }
+
+    c->numStudents = students;
+    c->numAssessments = assessments;
+
+    c->studentList = (Student*)malloc(students * sizeof(Student));
+
+    c->gradeMatrix = (float**)malloc(students * sizeof(float*));
+    for (int i = 0; i < students; i++) {
+        c->gradeMatrix[i] = (float*)malloc(assessments * sizeof(float));
+    }
+
+    c->assessmentNames = (char**)malloc(assessments * sizeof(char*));
+    for (int i = 0; i < assessments; i++) {
+        c->assessmentNames[i] = (char*)malloc(50 * sizeof(char));
+    }
+
+    return c;
+}
+
+void inputCourseData(Course* c) {
+    printf("\n------ Setup ------\n");
+    printf("Enter Course Name: ");
+    fgets(c->courseName, 50, stdin);
+    c->courseName[strcspn(c->courseName, "\n")] = 0;
+
+    printf("Enter Course Code: ");
+    fgets(c->courseCode, 10, stdin);
+    c->courseCode[strcspn(c->courseCode, "\n")] = 0;
+
+    for (int i = 0; i < c->numAssessments; i++) {
+        printf("Name of Assessment %d: ", i + 1);
+        fgets(c->assessmentNames[i], 50, stdin);
+        c->assessmentNames[i][strcspn(c->assessmentNames[i], "\n")] = 0;
+    }
+
+    printf("\n------ Data Entry ------\n");
+    for (int i = 0; i < c->numStudents; i++) {
+        printf("Student %d Details:\n", i + 1);
+
+        printf(" ID: ");
+        scanf("%d", &c->studentList[i].id);
+        getchar();
+
+        printf(" Name: ");
+        fgets(c->studentList[i].name, 50, stdin);
+        c->studentList[i].name[strcspn(c->studentList[i].name, "\n")] = 0;
+
+        for (int j = 0; j < c->numAssessments; j++) {
+            printf(" Enter marks for %s: ", c->assessmentNames[j]);
+            scanf("%f", &c->gradeMatrix[i][j]);
+        }
+        getchar();
+        printf("\n");
+    }
+}
+
+void generateReport(Course* c) {
+    printf("\n------ OFFICIAL REPORT: %s (%s) ------\n", c->courseName, c->courseCode);
+
+    printf("%-7s %-20s", "ID", "Name");
+    for (int j = 0; j < c->numAssessments; j++) {
+        printf(" %-12s", c->assessmentNames[j]);
+    }
+    printf(" %-10s\n", "Average");
+    printf("-------------------------------------------------------------\n");
+
+    for (int i = 0; i < c->numStudents; i++) {
+        float sum = 0;
+        printf("%-7d %-20s", c->studentList[i].id, c->studentList[i].name);
+
+        for (int j = 0; j < c->numAssessments; j++) {
+            printf(" %-12.2f", c->gradeMatrix[i][j]);
+            sum += c->gradeMatrix[i][j];
+        }
+
+        float average = sum / c->numAssessments;
+        printf(" %-10.2f\n", average);
+    }
+
+    printf("-------------------------------------------------------------\n");
+}
+
+void freeCourse(Course* c) {
+    for (int i = 0; i < c->numStudents; i++) {
+        free(c->gradeMatrix[i]);
+    }
+    free(c->gradeMatrix);
+
+    for (int i = 0; i < c->numAssessments; i++) {
+        free(c->assessmentNames[i]);
+    }
+    free(c->assessmentNames);
+
+    free(c->studentList);
+    free(c);
+}
+
+int main() {
+    int students, assessments;
+
+    printf("------ Flexi-Grade Initializer ------\n");
+    printf("How many students? ");
+    scanf("%d", &students);
+
+    printf("How many assessments? ");
+    scanf("%d", &assessments);
+    getchar();
+
+    Course* myCourse = createCourse(students, assessments);
+
+    inputCourseData(myCourse);
+    generateReport(myCourse);
+
+    freeCourse(myCourse);
+
+    return 0;
+}
