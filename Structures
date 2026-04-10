@@ -1,0 +1,83 @@
+#include <stdio.h>
+
+#define maxOrders 2
+#define maxItems 3
+
+struct Item {
+    char itemName[30];
+    int quantity;
+    float price;
+};
+
+struct Order {
+    int orderID;
+    char customerName[20];
+    int itemCount;
+    struct Item items[maxItems];
+};
+
+void inputDetails(struct Order orders[], int *orderCount) {
+    printf("Enter number of orders (max %d): ", maxOrders);
+    scanf("%d", orderCount);
+
+    for (int i = 0; i < *orderCount; i++) {
+        printf("\n--- Enter details for Order %d ---\n", i + 1);
+
+        printf("Enter Order ID: ");
+        scanf("%d", &orders[i].orderID);
+
+        printf("Enter Customer Name: ");
+        scanf("%s", orders[i].customerName);
+
+        printf("Number of items (max %d): ", maxItems);
+        scanf("%d", &orders[i].itemCount);
+
+        for (int j = 0; j < orders[i].itemCount; j++) {
+            printf("\nItem %d\n", j + 1);
+
+            printf("Enter Item Name: ");
+            scanf("%s", orders[i].items[j].itemName);
+
+            printf("Enter Quantity: ");
+            scanf("%d", &orders[i].items[j].quantity);
+
+            printf("Enter Price: ");
+            scanf("%f", &orders[i].items[j].price);
+        }
+    }
+}
+
+void displayDetails(struct Order orders[], int orderCount) {
+    printf("\n----- Order Summary -----\n");
+
+    for (int i = 0; i < orderCount; i++) {
+        printf("\nOrder ID: %d\nCustomer Name: %s\n",
+               orders[i].orderID,
+               orders[i].customerName);
+
+        float total = 0;
+
+        for (int j = 0; j < orders[i].itemCount; j++) {
+            float itemTotal = orders[i].items[j].quantity * orders[i].items[j].price;
+
+            printf("Item: %s | Price: %.2f | Total: %.2f\n",
+                   orders[i].items[j].itemName,
+                   orders[i].items[j].price,
+                   itemTotal);
+
+            total += itemTotal;
+        }
+
+        printf("Order Total = %.2f\n", total);
+    }
+}
+
+int main() {
+    struct Order orders[maxOrders];
+    int orderCount;
+
+    inputDetails(orders, &orderCount);
+    displayDetails(orders, orderCount);
+
+    return 0;
+}
